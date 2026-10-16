@@ -1,6 +1,6 @@
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const TODAY='2026-10-15';
+const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const people=[
 {id:1,name:'Давлетшина Анна Сергеевна',job:'Руководитель дивизиона',dept:'Управление маркетингом и связями с общественностью',status:'Работает',photo:'imgImage22'},
 {id:2,name:'Дмитриев Александр Витальевич',job:'Руководитель дивизиона',dept:'Управление маркетингом и связями с общественностью',status:'Работает',photo:'imgImage18'},
@@ -30,7 +30,7 @@ const personalTypes=[['Смена паспортных данных и ФИО'],
 const requestTypes=[vacationTypes,documentTypes,personalTypes];
 const makeRights=value=>categories.map((_,i)=>i<3?requestTypes[i].map(()=>[value,value]):[false,value]);
 const blankRights=()=>makeRights(false);
-let expandedGroups=[true,false,false],fieldEditing=false,deleteTarget=null,pauseTarget=null;
+let expandedGroups=[true,false,false],fieldEditing=false,deleteTarget=null,pauseTarget=null,resumeTarget=null;
 const defaultForm=()=>({name:'',start:'',end:'',indef:false,rights:makeRights(true)});
 let baseline=null,pendingNavigation=null;
 let records=[],draft=null; // Each page load starts a fresh research session.
@@ -43,7 +43,7 @@ const countRights=r=>r.flat(Infinity).filter(Boolean).length;
 const face=p=>`<span class="face face-${p.id}"><img src="assets/figma/41097-89081-${p.photo}.png" alt=""></span>`;
 function toast(text){clearTimeout(toastTimer);$('#toast').textContent=text;$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,4500);}
 function announce(text){$('#announcer').textContent=text;}
-function status(r){if(r.pending)return ['На активации','future'];if(r.paused)return ['Приостановлен','paused'];if(!countRights(r.rights))return ['Нет полномочий','paused'];if(r.end&&r.end<TODAY)return ['Срок истёк','paused'];if(r.start>TODAY)return ['С '+date(r.start),'future'];return ['Активен',''];}
+function status(r){if(r.pending)return ['На активации','future'];if(r.paused)return ['Приостановлен','paused'];if(!countRights(r.rights))return ['Нет полномочий','paused'];if(r.end&&r.end<today())return ['Срок истёк','paused'];if(r.start>today())return ['С '+date(r.start),'future'];return ['Активен',''];}
 function pill(r){const [t,c]=status(r);return `<span class="status-pill ${c}">${t}</span>`;}
 function focusContent(){requestAnimationFrame(()=>{$('#content').focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});});}
 function home(){if(records.length){startEditor(records.find(r=>r.id===currentId)?.id||records[0].id);return;}view='home';dirty=false;render();focusContent();}
@@ -117,27 +117,27 @@ function bulkRights(value){form.rights=makeRights(value);markChanged();}
 
 function readForm(){if(!$('#role-name'))return;form.name=$('#role-name').value;form.start=$('#start-date').value;form.indef=$('#indefinite').checked;if(!form.indef)form.end=$('#end-date').value;}
 function validate(){readForm();if(!fieldEditing)return true;let first=null;const error=(id,text,input)=>{$('#'+id).textContent=text;if(input){$('#'+input).setAttribute('aria-invalid',String(Boolean(text)));if(text&&!first)first=$('#'+input);}};
-error('name-error',form.name.trim()?'':'Введи название ассистента.','role-name');let de='';if(!form.start||(!form.indef&&!form.end))de='Укажи начало и окончание периода.';else if(records.find(r=>r.id===editing)?.pending&&form.start<TODAY)de='Дата начала не может быть раньше 15.10.2026.';else if(!form.indef&&form.end<form.start)de='Дата окончания должна быть не раньше даты начала.';error('date-error',de,!form.start?'start-date':form.indef?'start-date':'end-date');$('#start-date').setAttribute('aria-invalid',String(Boolean(de)));if(first){first.focus();announce('Проверь поля формы.');return false;}return true;}
+error('name-error',form.name.trim()?'':'Введи название ассистента.','role-name');let de='';if(!form.start||(!form.indef&&!form.end))de='Укажи начало и окончание периода.';else if(records.find(r=>r.id===editing)?.pending&&form.start<today())de=`Дата начала не может быть раньше ${date(today())}.`;else if(!form.indef&&form.end<form.start)de='Дата окончания должна быть не раньше даты начала.';error('date-error',de,!form.start?'start-date':form.indef?'start-date':'end-date');$('#start-date').setAttribute('aria-invalid',String(Boolean(de)));if(first){first.focus();announce('Проверь поля формы.');return false;}return true;}
 function saveDraft(){readForm();draft={selected:[...selected],form:structuredClone(form),editing};dirty=false;home();toast('Черновик сохранён. Доступ не выдан.');}
-function grant({pause=false}={}){if(busy||(!dirty&&!pause)||!validate())return false;busy=true;updateSummary();$$('#permissions-form input,#permissions-form button').forEach(e=>e.disabled=true);$('#grant-button').innerHTML='<span class="spinner" aria-hidden="true"></span> Сохраняем…';saveTimer=setTimeout(()=>{busy=false;if(failSave){failSave=false;pendingNavigation=null;renderForm();$('#save-error').innerHTML='<div class="notice error">Не удалось сохранить изменения. Настройки остались в форме. Попробуй ещё раз.</div>';return;}const updated={...structuredClone(form),name:form.name.trim(),end:form.indef?'':form.end,pending:false,paused:pause?true:form.paused,cardTitle:form.name.trim(),badgeEnd:null,referenceState:false};fieldEditing=false;records=records.map(r=>r.id===editing?updated:r);form=structuredClone(updated);baseline=structuredClone(updated);dirty=false;if(pendingNavigation){const next=pendingNavigation;pendingNavigation=null;next();}else renderForm();toast(pause?'Полномочия приостановлены. Изменения сохранены.':'Изменения сохранены');},600);return true;}
+function grant({pause=false}={}){if(busy||(!dirty&&!pause)||!validate())return false;busy=true;updateSummary();$$('#permissions-form input,#permissions-form button').forEach(e=>e.disabled=true);$('#grant-button').innerHTML='<span class="spinner" aria-hidden="true"></span> Сохраняем…';saveTimer=setTimeout(()=>{busy=false;if(failSave){failSave=false;pendingNavigation=null;renderForm();$('#save-error').innerHTML='<div class="notice error">Не удалось сохранить изменения. Настройки остались в форме. Попробуй ещё раз.</div>';return;}const updated={...structuredClone(form),name:form.name.trim(),end:pause?today():form.indef?'':form.end,indef:pause?false:form.indef,pending:false,paused:pause?true:form.paused,cardTitle:form.name.trim(),badgeEnd:null,referenceState:false};fieldEditing=false;records=records.map(r=>r.id===editing?updated:r);form=structuredClone(updated);baseline=structuredClone(updated);dirty=false;if(pendingNavigation){const next=pendingNavigation;pendingNavigation=null;next();}else renderForm();toast(pause?'Полномочия приостановлены. Изменения сохранены.':'Изменения сохранены');},600);return true;}
 
-function confirmation(title,text,actions){const d=$('#confirm');d.classList.remove('assistant-confirm');d.removeAttribute('aria-describedby');d.innerHTML=`<h2 id="confirm-title">${title}</h2><p>${text}</p><div class="confirm-actions">${actions}</div>`;d.showModal();}
+function confirmation(title,text,actions){const d=$('#confirm');d.classList.remove('assistant-confirm','resume-confirm');d.removeAttribute('aria-describedby');d.innerHTML=`<h2 id="confirm-title">${title}</h2><p>${text}</p><div class="confirm-actions">${actions}</div>`;d.showModal();}
 
 function lifecycleDialog(title,text,actions){
-const d=$('#confirm');d.classList.add('assistant-confirm');d.setAttribute('aria-describedby','confirm-description');
+const d=$('#confirm');d.classList.remove('resume-confirm');d.classList.add('assistant-confirm');d.setAttribute('aria-describedby','confirm-description');
 d.innerHTML=`<div class="assistant-confirm-head"><h2 id="confirm-title">${title}</h2><button class="close" data-action="cancel-lifecycle" aria-label="Закрыть подтверждение"><img src="assets/duplicate/imgOtpIcon24X24Close.svg" alt=""></button></div><div class="assistant-confirm-body"><p id="confirm-description">${text}</p><div class="confirm-actions">${actions}</div></div>`;
 d.showModal();d.querySelector('[data-action="cancel-lifecycle"]:not(.close)')?.focus();
 }
 function openPauseConfirmation(id){
 const r=records.find(x=>x.id===id);if(!r)return;pauseTarget=id;deleteTarget=null;readForm();
-lifecycleDialog('Приостановить ассистента?',`Ассистент временно не сможет пользоваться полномочиями. Ты сможешь возобновить их в любой момент.${id===editing&&dirty?' Текущие изменения сохранятся.':''}`,'<button class="btn ghost" data-action="cancel-lifecycle">Отменить</button><button class="btn" data-action="confirm-pause">Приостановить</button>');
+lifecycleDialog('Приостановить ассистента?',`Ассистент временно не сможет пользоваться полномочиями. Дата окончания полномочий станет сегодняшней — ${date(today())}. Ты сможешь возобновить их в любой момент.${id===editing&&dirty?' Текущие изменения сохранятся.':''}`,'<button class="btn ghost" data-action="cancel-lifecycle">Отменить</button><button class="btn" data-action="confirm-pause">Приостановить</button>');
 }
 function openDeleteConfirmation(id){
 const r=records.find(x=>x.id===id);if(!r)return;deleteTarget=id;pauseTarget=null;readForm();
 const alternative=r.paused?'Его полномочия уже приостановлены.':'Если хочешь отключить доступ временно и сохранить настройки, нажми «Приостановить».';
 lifecycleDialog('Удалить ассистента?',`Ассистент будет удалён из списка, его полномочия и настройки не сохранятся. ${alternative}`,'<button class="btn ghost" data-action="cancel-lifecycle">Отменить</button>'+(!r.paused?'<button class="btn secondary" data-action="pause-instead">Приостановить</button>':'')+'<button class="btn" data-action="delete-assistant">Удалить</button>');
 }
-function closeLifecycle(){pauseTarget=null;deleteTarget=null;$('#confirm').close();}
+function closeLifecycle(){pauseTarget=null;deleteTarget=null;resumeTarget=null;$('#confirm').close();}
 function confirmPause(){
 const id=pauseTarget,r=records.find(x=>x.id===id);if(!r)return;
 closeLifecycle();
@@ -145,10 +145,32 @@ if(id===editing&&view==='form'){
 readForm();
 if(dirty){grant({pause:true});return;}
 }
-records=records.map(item=>item.id===id?{...item,paused:true}:item);
+records=records.map(item=>item.id===id?{...item,paused:true,end:today(),indef:false,badgeEnd:null}:item);
 if(id===editing)startEditor(id);else if(view==='form')renderForm();else home();
 toast('Полномочия приостановлены');
 }
+function openResumeDialog(id){
+const r=records.find(x=>x.id===id);if(!r||!r.paused)return;
+resumeTarget=id;pauseTarget=null;deleteTarget=null;
+const d=$('#confirm');d.classList.add('assistant-confirm','resume-confirm');d.setAttribute('aria-describedby','confirm-description');
+d.innerHTML=`<div class="assistant-confirm-head"><h2 id="confirm-title">Возобновить полномочия</h2><button type="button" class="close" data-action="cancel-lifecycle" aria-label="Закрыть окно возобновления"><img src="assets/duplicate/imgOtpIcon24X24Close.svg" alt=""></button></div><form id="resume-form" class="assistant-confirm-body" novalidate><p id="confirm-description">Укажи новый срок действия полномочий ассистента.</p><fieldset class="resume-period"><legend>Срок действия прав</legend><div class="dates"><div><label class="field-label" for="resume-start">Дата начала</label><input type="date" id="resume-start" required min="${today()}" value="${today()}" aria-describedby="resume-error"></div><div><label class="field-label" for="resume-end">Дата окончания</label><input type="date" id="resume-end" required min="${today()}" aria-describedby="resume-error"></div></div><div class="field-error" id="resume-error" role="alert"></div></fieldset><div class="confirm-actions"><button type="button" class="btn ghost" data-action="cancel-lifecycle">Отменить</button><button type="submit" class="btn">Возобновить</button></div></form>`;
+d.showModal();$('#resume-start').focus();
+}
+function confirmResume(){
+const id=resumeTarget,r=records.find(x=>x.id===id);if(!r||!r.paused)return;
+const start=$('#resume-start').value,end=$('#resume-end').value;
+let message='',invalid=null;
+if(!start){message='Укажи дату начала.';invalid=$('#resume-start');}
+else if(start<today()){message='Дата начала не может быть раньше сегодняшней.';invalid=$('#resume-start');}
+else if(!end){message='Укажи дату окончания.';invalid=$('#resume-end');}
+else if(end<start){message='Дата окончания должна быть не раньше даты начала.';invalid=$('#resume-end');}
+$('#resume-error').textContent=message;
+for(const input of $$('#resume-form input'))input.setAttribute('aria-invalid',String(input===invalid));
+if(invalid){invalid.focus();return;}
+records=records.map(item=>item.id===id?{...item,start,end,indef:false,paused:false,badgeEnd:null}:item);
+closeLifecycle();startEditor(id);toast('Полномочия возобновлены');
+}
+
 function deleteAssistant(){
 const id=deleteTarget;if(!id)return;
 const removesCurrent=id===editing;records=records.filter(r=>r.id!==id);closeLifecycle();
@@ -166,9 +188,9 @@ function scenario(which){clearTimeout(saveTimer);$('#lab').close();$('#picker').
 function otherSection(name){view='other';dirty=false;$('#content').innerHTML=`<section class="empty-shell"><div class="empty-content"><h2>${esc(name)}</h2><p>Переход из раздела «Мои ассистенты» выполнен. В этом прототипе другие разделы не детализированы.</p><button class="btn secondary" data-action="home">К моим ассистентам</button></div></section>`;focusContent();}
 document.addEventListener('input',e=>{if(e.target.id==='employee-search'){query=e.target.value;mode='normal';renderPeople();return;}if(e.target.closest('#permissions-form')&&!['indefinite','all-rights'].includes(e.target.id)&&!e.target.dataset.right&&e.target.dataset.group===undefined&&!e.target.dataset.leaf){readForm();markChanged();}});
 document.addEventListener('change',e=>{const el=e.target;if(el.dataset.person){const id=Number(el.dataset.person);selected=el.checked?[...selected,id]:selected.filter(x=>x!==id);renderPeople();$(`[data-person="${id}"]`)?.focus();return;}if(el.dataset.right){const [i,j]=el.dataset.right.split('-').map(Number);form.rights[i][j]=el.checked;markChanged();}if(el.dataset.leaf){const [i,k,j]=el.dataset.leaf.split('-').map(Number);form.rights[i][k][j]=el.checked;markChanged();}if(el.dataset.group!==undefined){const [i,j]=el.dataset.group.split('-').map(Number);form.rights[i].forEach(row=>row[j]=el.checked);markChanged();}if(el.id==='all-rights')bulkRights(el.checked);if(el.id==='indefinite'){form.indef=el.checked;$('#end-date').disabled=el.checked;$('#end-date').value=el.checked?'':form.end;markChanged();}});
-document.addEventListener('submit',e=>{if(e.target.id==='permissions-form'){e.preventDefault();grant();}});
-document.addEventListener('click',e=>{const el=e.target.closest('button');if(!el)return;if(busy){toast('Подожди завершения сохранения.');return;}if(el.dataset.expand!==undefined){const i=Number(el.dataset.expand);expandedGroups[i]=!expandedGroups[i];el.setAttribute('aria-expanded',String(expandedGroups[i]));$('#group-requests-'+i).hidden=!expandedGroups[i];return;}if(el.dataset.editRecord){requestNavigation(()=>{startEditor(el.dataset.editRecord);fieldEditing=true;renderForm();$('#role-name').focus();});return;}if(el.dataset.copyRecord){requestNavigation(()=>openDuplicatePicker(el.dataset.copyRecord));return;}if(el.dataset.deleteRecord){openDeleteConfirmation(el.dataset.deleteRecord);return;}if(el.dataset.scenario){scenario(el.dataset.scenario);return;}if(el.dataset.section){requestNavigation(()=>otherSection(el.dataset.section));return;}if(el.dataset.record){if(el.dataset.record!==editing||view!=='form')requestNavigation(()=>startEditor(el.dataset.record));return;}if(el.dataset.unselect){selected=selected.filter(id=>id!==Number(el.dataset.unselect));renderPeople();return;}switch(el.dataset.action){case'cancel-duplicate-replace':$('#confirm').close();$('#picker-next')?.focus();break;case'confirm-duplicate-replace':$('#confirm').close();duplicateSelected(true);break;case'delete-assistant':deleteAssistant();break;case'confirm-pause':confirmPause();break;case'pause-instead':pauseTarget=deleteTarget;confirmPause();break;case'cancel-lifecycle':closeLifecycle();break;case'home':if(view!=='form')home();break;case'add':requestNavigation(()=>openPicker());break;case'lab':openLab();break;case'close-lab':$('#lab').close();break;case'close-picker':closePicker();break;case'clear-search':query='';mode='normal';$('#employee-search').value='';renderPeople();$('#employee-search').focus();break;case'clear-selection':selected=[];renderPeople();break;case'retry-search':mode='normal';renderPeople();break;case'picker-next':if(duplicateSource)duplicateSelected();else addSelected();break;case'enable-all':bulkRights(true);break;case'disable-all':bulkRights(false);break;case'cancel-edit':form=structuredClone(baseline);dirty=false;fieldEditing=!!records.find(r=>r.id===editing)?.pending;renderForm();toast('Изменения отменены');break;case'cancel-confirm':pendingNavigation=null;$('#confirm').close();break;case'discard':{const next=pendingNavigation;pendingNavigation=null;form=structuredClone(baseline);dirty=false;$('#confirm').close();if(next)next();break;}case'save-and-leave':$('#confirm').close();if(!grant())pendingNavigation=null;break;case'edit':startEditor(currentId);break;case'pause':{const r=records.find(x=>x.id===currentId);if(!r)return;if(r.paused){requestNavigation(()=>{const saved=records.find(x=>x.id===currentId);saved.paused=false;startEditor(saved.id);toast('Полномочия возобновлены');});}else openPauseConfirmation(r.id);break;}}});
-$('#picker').addEventListener('cancel',e=>{e.preventDefault();closePicker();});$('#confirm').addEventListener('cancel',()=>pendingNavigation=null);
+document.addEventListener('submit',e=>{if(e.target.id==='permissions-form'){e.preventDefault();grant();}else if(e.target.id==='resume-form'){e.preventDefault();confirmResume();}});
+document.addEventListener('click',e=>{const el=e.target.closest('button');if(!el)return;if(busy){toast('Подожди завершения сохранения.');return;}if(el.dataset.expand!==undefined){const i=Number(el.dataset.expand);expandedGroups[i]=!expandedGroups[i];el.setAttribute('aria-expanded',String(expandedGroups[i]));$('#group-requests-'+i).hidden=!expandedGroups[i];return;}if(el.dataset.editRecord){requestNavigation(()=>{startEditor(el.dataset.editRecord);fieldEditing=true;renderForm();$('#role-name').focus();});return;}if(el.dataset.copyRecord){requestNavigation(()=>openDuplicatePicker(el.dataset.copyRecord));return;}if(el.dataset.deleteRecord){openDeleteConfirmation(el.dataset.deleteRecord);return;}if(el.dataset.scenario){scenario(el.dataset.scenario);return;}if(el.dataset.section){requestNavigation(()=>otherSection(el.dataset.section));return;}if(el.dataset.record){if(el.dataset.record!==editing||view!=='form')requestNavigation(()=>startEditor(el.dataset.record));return;}if(el.dataset.unselect){selected=selected.filter(id=>id!==Number(el.dataset.unselect));renderPeople();return;}switch(el.dataset.action){case'cancel-duplicate-replace':$('#confirm').close();$('#picker-next')?.focus();break;case'confirm-duplicate-replace':$('#confirm').close();duplicateSelected(true);break;case'delete-assistant':deleteAssistant();break;case'confirm-pause':confirmPause();break;case'pause-instead':pauseTarget=deleteTarget;confirmPause();break;case'cancel-lifecycle':closeLifecycle();break;case'home':if(view!=='form')home();break;case'add':requestNavigation(()=>openPicker());break;case'lab':openLab();break;case'close-lab':$('#lab').close();break;case'close-picker':closePicker();break;case'clear-search':query='';mode='normal';$('#employee-search').value='';renderPeople();$('#employee-search').focus();break;case'clear-selection':selected=[];renderPeople();break;case'retry-search':mode='normal';renderPeople();break;case'picker-next':if(duplicateSource)duplicateSelected();else addSelected();break;case'enable-all':bulkRights(true);break;case'disable-all':bulkRights(false);break;case'cancel-edit':form=structuredClone(baseline);dirty=false;fieldEditing=!!records.find(r=>r.id===editing)?.pending;renderForm();toast('Изменения отменены');break;case'cancel-confirm':pendingNavigation=null;$('#confirm').close();break;case'discard':{const next=pendingNavigation;pendingNavigation=null;form=structuredClone(baseline);dirty=false;$('#confirm').close();if(next)next();break;}case'save-and-leave':$('#confirm').close();if(!grant())pendingNavigation=null;break;case'edit':startEditor(currentId);break;case'pause':{const r=records.find(x=>x.id===currentId);if(!r)return;if(r.paused){requestNavigation(()=>openResumeDialog(r.id));}else openPauseConfirmation(r.id);break;}}});
+$('#picker').addEventListener('cancel',e=>{e.preventDefault();closePicker();});$('#confirm').addEventListener('cancel',()=>{pendingNavigation=null;resumeTarget=null;pauseTarget=null;deleteTarget=null;});
 if(records.length)startEditor(records[0].id);else home();
 
 // Explain unavailable permissions without enabling the control.

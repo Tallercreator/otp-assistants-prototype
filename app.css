@@ -129,3 +129,13 @@
 .all-rights-count{font-size:14px;line-height:18px;font-weight:400;color:#a6a6a6;white-space:nowrap;font-variant-numeric:tabular-nums}
 .all-rights-count[hidden]{display:none}
 @media(max-width:800px){.master-row label{max-width:calc(100% - 42px)}}
+
+/* Renewal dates use the same controls as the assistant form. */
+.resume-period{border:0;padding:0;margin:0;min-width:0}
+.resume-period legend{font-size:18px;line-height:24px;font-weight:600;margin-bottom:20px}
+.resume-period .field-label{font-size:16px;line-height:20px;margin-bottom:8px}
+.resume-period .dates{gap:12px}
+.resume-period input[type=date]{height:46px;min-height:46px;padding:10px 12px;font-size:16px;background:#fff url('assets/duplicate/imgOtpIcon24X24.svg') right 12px center/24px 24px no-repeat}
+.resume-period input[type=date]::-webkit-calendar-picker-indicator{opacity:0;width:24px;height:24px;cursor:pointer}
+.resume-period .field-error:empty{display:none}
+@media(max-width:480px){.resume-period .dates{grid-template-columns:1fr}}
