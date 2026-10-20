@@ -139,3 +139,6 @@
 .resume-period input[type=date]::-webkit-calendar-picker-indicator{opacity:0;width:24px;height:24px;cursor:pointer}
 .resume-period .field-error:empty{display:none}
 @media(max-width:480px){.resume-period .dates{grid-template-columns:1fr}}
+
+.period-badge.future{background:#eceff6;color:#687180;white-space:normal;min-width:0}
+.unavailable-tooltip.action-tooltip{font-size:14px;line-height:20px;padding:10px 14px;border-radius:12px}
