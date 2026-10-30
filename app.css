@@ -142,3 +142,8 @@
 
 .period-badge.future{background:#eceff6;color:#687180;white-space:normal;min-width:0}
 .unavailable-tooltip.action-tooltip{font-size:14px;line-height:20px;padding:10px 14px;border-radius:12px}
+
+/* Keep permission column labels visible while scrolling the request list. */
+.matrix-border{overflow:clip}
+.permission-table thead{position:sticky;top:0;z-index:5;background:#f6f7fa;box-shadow:0 1px 0 #e3e8f1}
+.permission-table thead th{background:#f6f7fa}
