@@ -165,3 +165,7 @@
 .clear-permissions:hover{color:#222;text-decoration:underline;text-underline-offset:3px}.clear-permissions:disabled{color:#a6adba;cursor:default;text-decoration:none}
 @media(max-width:800px){.permission-preset{padding:8px 5px;font-size:13px;line-height:18px}.quick-permissions-footer{flex-wrap:wrap;gap:0 12px}.quick-permissions h3{font-size:16px}}
 @media(max-width:380px){.permission-presets{grid-template-columns:1fr}.permission-preset{min-height:44px}}
+
+/* A non-applicable approval is explanatory text, not a disabled permission. */
+.no-approval-note{display:block;padding:8px 2px;color:#7d828b;font-size:13px;line-height:18px;font-weight:400}
+@media(max-width:800px){.no-approval-note{padding:8px 3px;font-size:11px;line-height:15px}}
