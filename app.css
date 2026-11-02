@@ -151,18 +151,17 @@
 /* Allow descriptive permission headings to wrap within their columns. */
 .permission-table thead th:not(:first-child){padding:12px 6px;overflow-wrap:anywhere}
 
-/* Quick permission sets; selection is derived from the individual rights. */
-.quick-permissions{margin:0 0 24px}
-.quick-permissions h3{font-size:18px;line-height:24px;font-weight:600;margin:0 0 8px}
-.quick-permissions>p{font-size:14px;line-height:20px;color:#687180;margin:0 0 16px}
-.permission-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.permission-preset{min-height:52px;padding:10px 12px;border:1px solid #cbd2df;border-radius:12px;background:#fff;color:#53565d;font-size:15px;line-height:20px;font-weight:600;text-align:center;overflow-wrap:anywhere}
-.permission-preset:hover{background:#f6f7fa;border-color:#a6adba}
-.permission-preset[aria-pressed="true"]{background:#f0fad8;border-color:#8bbd28;color:#222}
-.permission-preset:focus-visible,.clear-permissions:focus-visible{outline:3px solid #5685c4;outline-offset:3px}
-.quick-permissions-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin-top:8px}
+/* Quick permission sets; a compact control within the permissions section. */
+.quick-permissions{margin:0 0 12px}
+.quick-permissions h3{font-size:18px;line-height:24px;font-weight:600;margin:0 0 16px}
+.permission-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding:4px;border-radius:12px;background:#f3f4f7}
+.permission-preset{min-height:44px;padding:8px 10px;border:1px solid transparent;border-radius:9px;background:transparent;color:#687180;font-size:14px;line-height:20px;font-weight:400;text-align:center;overflow-wrap:anywhere}
+.permission-preset:hover{background:#e9ecf2;color:#222}
+.permission-preset[aria-pressed="true"]{background:#fff;border-color:#cbd2df;color:#222;font-weight:600}
+.permission-preset:focus-visible,.clear-permissions:focus-visible{outline:3px solid #5685c4;outline-offset:2px}
+.quick-permissions-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin-top:4px}
 .preset-summary{font-size:14px;line-height:20px;color:#7d828b}
-.clear-permissions{flex-shrink:0;min-height:44px;padding:8px 0 8px 8px;color:#53565d;text-decoration:underline;text-underline-offset:3px;font-size:14px;line-height:20px}
-.clear-permissions:hover{color:#222}.clear-permissions:disabled{color:#a6adba;cursor:default}
-@media(max-width:800px){.permission-preset{padding:10px 6px;font-size:13px;line-height:18px}.quick-permissions-footer{flex-wrap:wrap;gap:0 12px}.quick-permissions h3{font-size:16px}}
+.clear-permissions{flex-shrink:0;min-height:44px;padding:8px 0 8px 8px;color:#687180;font-size:14px;line-height:20px}
+.clear-permissions:hover{color:#222;text-decoration:underline;text-underline-offset:3px}.clear-permissions:disabled{color:#a6adba;cursor:default;text-decoration:none}
+@media(max-width:800px){.permission-preset{padding:8px 5px;font-size:13px;line-height:18px}.quick-permissions-footer{flex-wrap:wrap;gap:0 12px}.quick-permissions h3{font-size:16px}}
 @media(max-width:380px){.permission-presets{grid-template-columns:1fr}.permission-preset{min-height:44px}}
