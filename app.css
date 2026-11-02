@@ -147,3 +147,6 @@
 .matrix-border{overflow:clip}
 .permission-table thead{position:sticky;top:0;z-index:5;background:#f6f7fa;box-shadow:0 1px 0 #e3e8f1}
 .permission-table thead th{background:#f6f7fa}
+
+/* Allow descriptive permission headings to wrap within their columns. */
+.permission-table thead th:not(:first-child){padding:12px 6px;overflow-wrap:anywhere}
