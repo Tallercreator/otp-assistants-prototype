@@ -242,3 +242,10 @@ html{scroll-padding-top:88px}
 .permission-table .all-requests-row td:first-child{padding-left:16px}
 .permission-table .all-requests{padding-left:0}
 .permission-table .all-requests-row td{border-bottom:1px solid #d0d8e8}
+
+/* v25: радио в списке сотрудников — в стиле переключателей прототипа */
+.person input[type=radio]{appearance:none;-webkit-appearance:none;width:22px;height:22px;margin:0;border:2px solid #a6adba;border-radius:50%;background:#fff;flex-shrink:0;cursor:pointer;transition:border-color .15s,border-width .15s}
+.person:hover input[type=radio]{border-color:#7f8795}
+.person input[type=radio]:checked{border:7px solid #a8eb00;background:#fff}
+.person input[type=radio]:focus-visible{outline:3px solid #5685c4;outline-offset:3px}
+.person input[type=radio]:disabled{border-color:#d7dbe3;background:#f3f4f6;cursor:not-allowed}
