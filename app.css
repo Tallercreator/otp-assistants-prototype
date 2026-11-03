@@ -181,3 +181,64 @@
 html{scroll-padding-top:88px}
 .app-main>.header{position:sticky;top:0;z-index:20;background:#fff}
 .permission-table thead{top:72px}
+
+/* v10: действия карточки в меню «···» */
+.card-actions{position:relative;gap:0}.card-actions .card-menu-trigger{width:40px;height:40px;border-radius:12px;background:#f0f2f5;color:#53565d;font-size:22px;line-height:1;letter-spacing:1px}.card-actions .card-menu-trigger:hover,.card-actions .card-menu-trigger[aria-expanded=true]{background:#e3e7ee;border-radius:12px}.card-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:20;min-width:280px;padding:8px;border-radius:16px;background:#fff;box-shadow:0 14px 44px rgba(38,59,100,.22);display:flex;flex-direction:column;gap:2px}.card-menu[hidden]{display:none}.card-actions .card-menu button{width:100%;height:auto;justify-content:flex-start;gap:12px;padding:12px;border-radius:10px;font-size:16px;line-height:22px;color:#222;text-align:left;white-space:nowrap}.card-actions .card-menu button:hover,.card-actions .card-menu button:focus-visible{background:#f0f2f5;border-radius:10px}.card-menu button img{width:20px;height:20px;flex-shrink:0}.card-actions .card-menu button.danger{color:var(--danger)}
+
+/* v12: роли и заявки по БТ */
+.group-note{display:block;padding:0 0 10px 56px;font-size:13px;line-height:18px;color:#7d828b}
+.unavailable-groups{margin-top:12px}
+.permission-table thead th:not(:first-child){width:168px!important;white-space:nowrap;padding-left:8px;padding-right:8px}
+.permission-preset[disabled]{opacity:.45;cursor:not-allowed}
+.scenario-grid button[aria-pressed=true]{background:#e1f3b4;border-color:#a8db36}
+
+/* v13: меню действий в панели, в карточке — только удаление */
+.panel-actions{flex-shrink:0}
+.card-actions .card-menu button img{width:20px;height:20px;opacity:.85}
+
+/* v14 */
+.card-actions .card-menu button[disabled]{opacity:.45;cursor:not-allowed;background:none}
+
+/* v17: меню действий без акцентных цветов */
+.card-actions .card-menu button.danger{color:#222}
+.card-actions .card-menu button img{filter:grayscale(1);opacity:.75}
+.card-actions .card-menu button[disabled] img{opacity:.6}
+
+/* v18: автоматический просмотр — включённый тоггл без возможности выключить */
+.unavailable-switch .switch:checked{opacity:.75;cursor:default}
+
+/* v19: мастер-тогглы в шапке таблицы вместо пресетов */
+.rights-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
+.rights-head h3{margin:0}
+.permission-table thead th{vertical-align:top}
+.col-title{display:block}
+.col-master{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:10px}
+.col-count{font-size:12px;line-height:16px;color:#a6a6a6;font-variant-numeric:tabular-nums}
+
+/* v20: шапка с мастер-тогглами — одна высота, всё по центру */
+.permission-table thead th{height:auto;vertical-align:middle}
+.permission-table thead th:first-child{padding:16px 12px 16px 16px}
+.permission-table thead th:not(:first-child){padding:12px 8px 10px}
+.col-title{display:block;line-height:18px}
+.col-master{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:8px}
+.col-count{font-size:12px;line-height:14px;color:#a6a6a6;font-variant-numeric:tabular-nums}
+
+/* v21: заголовки колонок на одной линии, тогглы под ними */
+.permission-table thead th{vertical-align:top}
+.permission-table thead th:first-child{padding:12px 12px 10px 16px}
+.permission-table thead th:first-child .col-title{text-align:left}
+
+/* v22: строка «Все заявки» — мастер-тогглы в теле таблицы, шапка только текстовая */
+.permission-table thead th{vertical-align:middle;height:64px;padding:0}
+.permission-table thead th:first-child{padding:0 12px 0 16px}
+.permission-table thead th:not(:first-child){padding:0 8px}
+.col-title{display:block;line-height:18px}
+.all-requests{display:flex;align-items:center;min-height:40px;padding-left:64px;font-size:18px;line-height:20px;font-weight:600;color:#53565d}
+.all-requests-row td{border-bottom:1px solid #d0d8e8}
+.all-requests-row td:not(:first-child){position:relative}
+.all-requests-row .col-count{display:block;font-size:12px;line-height:14px;color:#a6a6a6;margin-top:4px;font-variant-numeric:tabular-nums}
+
+/* v23: «Все заявки» по левому краю, разделитель под строкой */
+.permission-table .all-requests-row td:first-child{padding-left:16px}
+.permission-table .all-requests{padding-left:0}
+.permission-table .all-requests-row td{border-bottom:1px solid #d0d8e8}
